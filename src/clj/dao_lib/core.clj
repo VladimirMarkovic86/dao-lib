@@ -5,7 +5,7 @@
             [ajax-lib.http.mime-type :as mt]
             [ajax-lib.http.status-code :as stc]))
 
-(defn- build-projection
+(defn build-projection
   "Build projection for db interaction"
   [vector-fields
    include]
