@@ -1,22 +1,9 @@
 (ns dao-lib.core
-  (:require [mongo-lib.core :as mon]
+  (:require [db-lib.core :as db]
             [utils-lib.core :as utils]
             [ajax-lib.http.entity-header :as eh]
             [ajax-lib.http.mime-type :as mt]
             [ajax-lib.http.status-code :as stc]))
-
-(defn build-projection
-  "Build projection for db interaction"
-  [vector-fields
-   include]
-  (let [projection (atom {})]
-    (doseq [field vector-fields]
-      (swap!
-        projection
-        assoc
-        field
-        include))
-    @projection))
 
 (defn get-entities
   "Prepare data for table"
@@ -25,15 +12,17 @@
     (if (:pagination request-body)
       (let [current-page (:current-page request-body)
             rows (:rows request-body)
-            count-entities (mon/mongodb-count
+            count-entities (db/count-by-filter
                              (:entity-type request-body)
                              (:entity-filter request-body))
             number-of-pages (when (:pagination request-body)
                               (utils/round-up
                                 count-entities
                                 rows))
-            current-page (if (= current-page
-                                number-of-pages)
+            current-page (if (and (= current-page
+                                     number-of-pages)
+                                  (not= current-page
+                                        0))
                            (dec
                              current-page)
                            current-page)
@@ -41,15 +30,12 @@
             entity-filter (:entity-filter request-body)
             projection-vector (:projection request-body)
             projection-include (:projection-include request-body)
-            projection (build-projection
-                         projection-vector
-                         projection-include)
             qsort (:qsort request-body)
             collation (:collation request-body)
-            db-result (mon/mongodb-find
+            db-result (db/find-by-filter
                         entity-type
                         entity-filter
-                        projection
+                        projection-vector
                         qsort
                         rows
                         (* current-page
@@ -67,15 +53,12 @@
             entity-filter (:entity-filter request-body)
             projection-vector (:projection request-body)
             projection-include (:projection-include request-body)
-            projection (build-projection
-                         projection-vector
-                         projection-include)
             qsort (:qsort request-body)
             collation (:collation request-body)
-            db-result (mon/mongodb-find
+            db-result (db/find-by-filter
                         entity-type
                         entity-filter
-                        projection
+                        projection-vector
                         qsort
                         0
                         0
@@ -98,7 +81,7 @@
 (defn get-entity
   "Prepare requested entity for response"
   [request-body]
-  (let [entity (mon/mongodb-find-by-id
+  (let [entity (db/find-by-id
                  (:entity-type request-body)
                  (:_id (:entity-filter request-body))
                 )
@@ -123,9 +106,10 @@
   "Update entity"
   [request-body]
   (try
-    (mon/mongodb-update-by-id
+    (db/update-by-id
       (:entity-type request-body)
-      (:_id request-body)
+      (read-string
+        (:_id request-body))
       (:entity request-body))
     {:status (stc/ok)
      :headers {(eh/content-type) (mt/text-plain)}
@@ -141,7 +125,7 @@
   "Insert entity"
   [request-body]
   (try
-    (mon/mongodb-insert-one
+    (db/insert-one
       (:entity-type request-body)
       (:entity request-body))
     {:status (stc/ok)
@@ -158,7 +142,7 @@
   "Delete entity"
   [request-body]
   (try
-    (mon/mongodb-delete-by-id
+    (db/delete-by-id
       (:entity-type request-body)
       (:_id (:entity-filter request-body))
      )
