@@ -11,7 +11,7 @@ This project is ment to be used only with mongo-lib project with which it fetche
 You can use this project as dependencie in clojure projects by listing it in project.clj
 
 ```
-[org.clojars.vladimirmarkovic/dao-lib "0.2.0"]
+[org.clojars.vladimirmarkovic86/dao-lib "0.2.0"]
 ```
 
 ## Authors
