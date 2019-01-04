@@ -97,11 +97,16 @@
 
 (defn get-entity
   "Prepare requested entity for response"
-  [request-body]
+  [{entity-type :entity-type
+    entity-filter :entity-filter
+    entity-projection :entity-projection
+    projection-include :projection-include}]
   (let [entity (mon/mongodb-find-by-id
-                 (:entity-type request-body)
-                 (:_id (:entity-filter request-body))
-                )
+                 entity-type
+                 (:_id entity-filter)
+                 (build-projection
+                   entity-projection
+                   true))
         entity  (assoc
                   entity
                   :_id
