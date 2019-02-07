@@ -91,6 +91,7 @@
        :headers {(eh/content-type) (mt/text-plain)}
        :body (str
                {:status "Error"
+                :status-code 70
                 :message (.getMessage ex)})}
      ))
  )
@@ -135,12 +136,27 @@
     {:status (stc/ok)
      :headers {(eh/content-type) (mt/text-plain)}
      :body (str {:status "success"})}
+    (catch com.mongodb.MongoException mex
+      (println (.getMessage mex))
+      {:status (stc/internal-server-error)
+       :headers {(eh/content-type) (mt/text-plain)}
+       :body (str
+               {:status "Error"
+                :message (.getMessage
+                           mex)
+                :status-code 70
+                :message-code 71})})
     (catch Exception ex
-     (println (.getMessage ex))
-     {:status (stc/internal-server-error)
-      :headers {(eh/content-type) (mt/text-plain)}
-      :body (str {:status "error"})})
-   ))
+      (println (.getMessage ex))
+      {:status (stc/internal-server-error)
+       :headers {(eh/content-type) (mt/text-plain)}
+       :body (str
+               {:status "Error"
+                :status-code 70
+                :message (.getMessage
+                           ex)})}
+     ))
+ )
 
 (defn insert-entity
   "Insert entity"
@@ -151,13 +167,27 @@
       (:entity request-body))
     {:status (stc/ok)
      :headers {(eh/content-type) (mt/text-plain)}
-     :body (str {:status "success"})}
+     :body (str {:status "Success"})}
+    (catch com.mongodb.MongoException mex
+      (println (.getMessage mex))
+      {:status (stc/internal-server-error)
+       :headers {(eh/content-type) (mt/text-plain)}
+       :body (str
+               {:status "Error"
+                :message (.getMessage mex)
+                :status-code 70
+                :message-code 71})})
     (catch Exception ex
-     (println (.getMessage ex))
-     {:status (stc/internal-server-error)
-      :headers {(eh/content-type) (mt/text-plain)}
-      :body (str {:status "error"})})
-   ))
+      (println (.getMessage ex))
+      {:status (stc/internal-server-error)
+       :headers {(eh/content-type) (mt/text-plain)}
+       :body (str
+               {:status "Error"
+                :status-code 70
+                :message (.getMessage
+                           ex)})}
+     ))
+ )
 
 (defn delete-entity
   "Delete entity"
@@ -171,9 +201,13 @@
      :headers {(eh/content-type) (mt/text-plain)}
      :body (str {:status "success"})}
     (catch Exception ex
-     (println (.getMessage ex))
-     {:status (stc/internal-server-error)
-      :headers {(eh/content-type) (mt/text-plain)}
-      :body (str {:status "error"})})
+      (println (.getMessage ex))
+      {:status (stc/internal-server-error)
+       :headers {(eh/content-type) (mt/text-plain)}
+       :body (str
+               {:status "Error"
+                :status-code 70
+                :message (.getMessage
+                           ex)})})
    ))
 

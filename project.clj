@@ -1,4 +1,4 @@
-(defproject org.clojars.vladimirmarkovic86/dao-lib "0.3.5"
+(defproject org.clojars.vladimirmarkovic86/dao-lib "0.3.6"
   :description "Data access object library"
   :url "http://github.com/VladimirMarkovic86/dao-lib"
   :license {:name "Eclipse Public License"
