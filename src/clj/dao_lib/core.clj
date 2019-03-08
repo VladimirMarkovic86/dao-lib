@@ -1,6 +1,6 @@
 (ns dao-lib.core
   (:require [mongo-lib.core :as mon]
-            [utils-lib.core :as utils]
+            [utils-lib.core :as utils :refer [parse-body]]
             [ajax-lib.http.entity-header :as eh]
             [ajax-lib.http.mime-type :as mt]
             [ajax-lib.http.status-code :as stc]))
@@ -20,71 +20,73 @@
 
 (defn get-entities
   "Prepare data for table"
-  [request-body]
+  [request]
   (try
-    (if (:pagination request-body)
-      (let [current-page (:current-page request-body)
-            rows (:rows request-body)
-            count-entities (mon/mongodb-count
-                             (:entity-type request-body)
-                             (:entity-filter request-body))
-            number-of-pages (when (:pagination request-body)
-                              (utils/round-up
-                                count-entities
-                                rows))
-            current-page (if (= current-page
-                                number-of-pages)
-                           (dec
+    (let [request-body (parse-body
+                         request)]
+      (if (:pagination request-body)
+        (let [current-page (:current-page request-body)
+              rows (:rows request-body)
+              count-entities (mon/mongodb-count
+                               (:entity-type request-body)
+                               (:entity-filter request-body))
+              number-of-pages (when (:pagination request-body)
+                                (utils/round-up
+                                  count-entities
+                                  rows))
+              current-page (if (= current-page
+                                  number-of-pages)
+                             (dec
+                               current-page)
                              current-page)
-                           current-page)
-            entity-type (:entity-type request-body)
-            entity-filter (:entity-filter request-body)
-            projection-vector (:projection request-body)
-            projection-include (:projection-include request-body)
-            projection (build-projection
-                         projection-vector
-                         projection-include)
-            qsort (:qsort request-body)
-            collation (:collation request-body)
-            db-result (mon/mongodb-find
-                        entity-type
-                        entity-filter
-                        projection
-                        qsort
-                        rows
-                        (* current-page
-                           rows)
-                        collation)]
-        {:status (stc/ok)
-         :headers {(eh/content-type) (mt/text-plain)}
-         :body (str {:status "success"
-                     :data db-result
-                     :pagination {:current-page     current-page
-                                  :rows             rows
-                                  :total-row-count  count-entities}})
-         })
-      (let [entity-type (:entity-type request-body)
-            entity-filter (:entity-filter request-body)
-            projection-vector (:projection request-body)
-            projection-include (:projection-include request-body)
-            projection (build-projection
-                         projection-vector
-                         projection-include)
-            qsort (:qsort request-body)
-            collation (:collation request-body)
-            db-result (mon/mongodb-find
-                        entity-type
-                        entity-filter
-                        projection
-                        qsort
-                        0
-                        0
-                        collation)]
-        {:status (stc/ok)
-         :headers {(eh/content-type) (mt/text-plain)}
-         :body (str {:status "success"
-                     :data db-result})})
-     )
+              entity-type (:entity-type request-body)
+              entity-filter (:entity-filter request-body)
+              projection-vector (:projection request-body)
+              projection-include (:projection-include request-body)
+              projection (build-projection
+                           projection-vector
+                           projection-include)
+              qsort (:qsort request-body)
+              collation (:collation request-body)
+              db-result (mon/mongodb-find
+                          entity-type
+                          entity-filter
+                          projection
+                          qsort
+                          rows
+                          (* current-page
+                             rows)
+                          collation)]
+          {:status (stc/ok)
+           :headers {(eh/content-type) (mt/text-plain)}
+           :body (str {:status "success"
+                       :data db-result
+                       :pagination {:current-page     current-page
+                                    :rows             rows
+                                    :total-row-count  count-entities}})
+           })
+        (let [entity-type (:entity-type request-body)
+              entity-filter (:entity-filter request-body)
+              projection-vector (:projection request-body)
+              projection-include (:projection-include request-body)
+              projection (build-projection
+                           projection-vector
+                           projection-include)
+              qsort (:qsort request-body)
+              collation (:collation request-body)
+              db-result (mon/mongodb-find
+                          entity-type
+                          entity-filter
+                          projection
+                          qsort
+                          0
+                          0
+                          collation)]
+          {:status (stc/ok)
+           :headers {(eh/content-type) (mt/text-plain)}
+           :body (str {:status "success"
+                       :data db-result})})
+       ))
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
@@ -98,11 +100,14 @@
 
 (defn get-entity
   "Prepare requested entity for response"
-  [{entity-type :entity-type
-    entity-filter :entity-filter
-    entity-projection :entity-projection
-    projection-include :projection-include}]
-  (let [entity (mon/mongodb-find-by-id
+  [request]
+  (let [request-body (parse-body
+                       request)
+        {entity-type :entity-type
+         entity-filter :entity-filter
+         entity-projection :entity-projection
+         projection-include :projection-include} request-body
+        entity (mon/mongodb-find-by-id
                  entity-type
                  (:_id entity-filter)
                  (build-projection
@@ -127,25 +132,40 @@
 
 (defn update-entity
   "Update entity"
-  [request-body]
+  [request]
   (try
-    (mon/mongodb-update-by-id
-      (:entity-type request-body)
-      (:_id request-body)
-      (:entity request-body))
-    {:status (stc/ok)
-     :headers {(eh/content-type) (mt/text-plain)}
-     :body (str {:status "success"})}
-    (catch com.mongodb.MongoException mex
-      (println (.getMessage mex))
-      {:status (stc/internal-server-error)
+    (let [request-body (parse-body
+                         request)]
+      (mon/mongodb-update-by-id
+        (:entity-type request-body)
+        (:_id request-body)
+        (:entity request-body))
+      {:status (stc/ok)
        :headers {(eh/content-type) (mt/text-plain)}
-       :body (str
-               {:status "Error"
-                :message (.getMessage
-                           mex)
-                :status-code 70
-                :message-code 71})})
+       :body (str {:status "success"})})
+    (catch com.mongodb.MongoWriteException mex
+      (println (.getMessage mex))
+      (if (= com.mongodb.ErrorCategory/DUPLICATE_KEY
+             (.getCategory
+               (.getError
+                 mex))
+           )
+        {:status (stc/internal-server-error)
+         :headers {(eh/content-type) (mt/text-plain)}
+         :body (str
+                 {:status "Error"
+                  :message (.getMessage
+                             mex)
+                  :status-code 70
+                  :message-code 71})}
+        {:status (stc/internal-server-error)
+         :headers {(eh/content-type) (mt/text-plain)}
+         :body (str
+                 {:status "Error"
+                  :status-code 70
+                  :message (.getMessage
+                             mex)})}
+       ))
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
@@ -160,23 +180,38 @@
 
 (defn insert-entity
   "Insert entity"
-  [request-body]
+  [request]
   (try
-    (mon/mongodb-insert-one
-      (:entity-type request-body)
-      (:entity request-body))
-    {:status (stc/ok)
-     :headers {(eh/content-type) (mt/text-plain)}
-     :body (str {:status "Success"})}
-    (catch com.mongodb.MongoException mex
-      (println (.getMessage mex))
-      {:status (stc/internal-server-error)
+    (let [request-body (parse-body
+                         request)]
+      (mon/mongodb-insert-one
+        (:entity-type request-body)
+        (:entity request-body))
+      {:status (stc/ok)
        :headers {(eh/content-type) (mt/text-plain)}
-       :body (str
-               {:status "Error"
-                :message (.getMessage mex)
-                :status-code 70
-                :message-code 71})})
+       :body (str {:status "Success"})})
+    (catch com.mongodb.MongoWriteException mex
+      (println (.getMessage mex))
+      (if (= com.mongodb.ErrorCategory/DUPLICATE_KEY
+             (.getCategory
+               (.getError
+                 mex))
+           )
+        {:status (stc/internal-server-error)
+         :headers {(eh/content-type) (mt/text-plain)}
+         :body (str
+                 {:status "Error"
+                  :message (.getMessage mex)
+                  :status-code 70
+                  :message-code 71})}
+        {:status (stc/internal-server-error)
+         :headers {(eh/content-type) (mt/text-plain)}
+         :body (str
+                 {:status "Error"
+                  :status-code 70
+                  :message (.getMessage
+                             mex)})}
+       ))
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
@@ -191,15 +226,17 @@
 
 (defn delete-entity
   "Delete entity"
-  [request-body]
+  [request]
   (try
-    (mon/mongodb-delete-by-id
-      (:entity-type request-body)
-      (:_id (:entity-filter request-body))
-     )
-    {:status (stc/ok)
-     :headers {(eh/content-type) (mt/text-plain)}
-     :body (str {:status "success"})}
+    (let [request-body (parse-body
+                         request)]
+      (mon/mongodb-delete-by-id
+        (:entity-type request-body)
+        (:_id (:entity-filter request-body))
+       )
+      {:status (stc/ok)
+       :headers {(eh/content-type) (mt/text-plain)}
+       :body (str {:status "success"})})
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
@@ -208,6 +245,7 @@
                {:status "Error"
                 :status-code 70
                 :message (.getMessage
-                           ex)})})
-   ))
+                           ex)})}
+     ))
+ )
 
