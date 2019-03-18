@@ -1,6 +1,6 @@
 (ns dao-lib.core
   (:require [mongo-lib.core :as mon]
-            [utils-lib.core :as utils :refer [parse-body]]
+            [utils-lib.core :as utils]
             [ajax-lib.http.entity-header :as eh]
             [ajax-lib.http.mime-type :as mt]
             [ajax-lib.http.status-code :as stc]))
@@ -22,7 +22,7 @@
   "Prepare data for table"
   [request]
   (try
-    (let [request-body (parse-body
+    (let [request-body (:body
                          request)]
       (if (:pagination request-body)
         (let [current-page (:current-page request-body)
@@ -58,12 +58,12 @@
                              rows)
                           collation)]
           {:status (stc/ok)
-           :headers {(eh/content-type) (mt/text-plain)}
-           :body (str {:status "success"
-                       :data db-result
-                       :pagination {:current-page     current-page
-                                    :rows             rows
-                                    :total-row-count  count-entities}})
+           :headers {(eh/content-type) (mt/text-clojurescript)}
+           :body {:status "success"
+                  :data db-result
+                  :pagination {:current-page     current-page
+                               :rows             rows
+                               :total-row-count  count-entities}}
            })
         (let [entity-type (:entity-type request-body)
               entity-filter (:entity-filter request-body)
@@ -83,25 +83,23 @@
                           0
                           collation)]
           {:status (stc/ok)
-           :headers {(eh/content-type) (mt/text-plain)}
-           :body (str {:status "success"
-                       :data db-result})})
-       ))
+           :headers {(eh/content-type) (mt/text-clojurescript)}
+           :body {:status "success"
+                  :data db-result}}))
+     )
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str
-               {:status "Error"
-                :status-code 70
-                :message (.getMessage ex)})}
-     ))
- )
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status "Error"
+              :status-code 70
+              :message (.getMessage ex)}})
+   ))
 
 (defn get-entity
   "Prepare requested entity for response"
   [request]
-  (let [request-body (parse-body
+  (let [request-body (:body
                        request)
         {entity-type :entity-type
          entity-filter :entity-filter
@@ -121,28 +119,28 @@
                  )]
     (if entity
       {:status (stc/ok)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str {:status  "success"
-                   :data  entity})}
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status  "success"
+              :data  entity}}
       {:status (stc/not-found)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str {:status  "error"
-                   :error-message "There is no entity, for given criteria."})})
-   ))
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status  "error"
+              :error-message "There is no entity, for given criteria."}}))
+ )
 
 (defn update-entity
   "Update entity"
   [request]
   (try
-    (let [request-body (parse-body
+    (let [request-body (:body
                          request)]
       (mon/mongodb-update-by-id
         (:entity-type request-body)
         (:_id request-body)
         (:entity request-body))
       {:status (stc/ok)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str {:status "success"})})
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status "success"}})
     (catch com.mongodb.MongoWriteException mex
       (println (.getMessage mex))
       (if (= com.mongodb.ErrorCategory/DUPLICATE_KEY
@@ -151,45 +149,41 @@
                  mex))
            )
         {:status (stc/internal-server-error)
-         :headers {(eh/content-type) (mt/text-plain)}
-         :body (str
-                 {:status "Error"
-                  :message (.getMessage
-                             mex)
-                  :status-code 70
-                  :message-code 71})}
+         :headers {(eh/content-type) (mt/text-clojurescript)}
+         :body {:status "Error"
+                :message (.getMessage
+                           mex)
+                :status-code 70
+                :message-code 71}}
         {:status (stc/internal-server-error)
-         :headers {(eh/content-type) (mt/text-plain)}
-         :body (str
-                 {:status "Error"
-                  :status-code 70
-                  :message (.getMessage
-                             mex)})}
-       ))
+         :headers {(eh/content-type) (mt/text-clojurescript)}
+         :body {:status "Error"
+                :status-code 70
+                :message (.getMessage
+                           mex)}})
+     )
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str
-               {:status "Error"
-                :status-code 70
-                :message (.getMessage
-                           ex)})}
-     ))
- )
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status "Error"
+              :status-code 70
+              :message (.getMessage
+                         ex)}})
+   ))
 
 (defn insert-entity
   "Insert entity"
   [request]
   (try
-    (let [request-body (parse-body
+    (let [request-body (:body
                          request)]
       (mon/mongodb-insert-one
         (:entity-type request-body)
         (:entity request-body))
       {:status (stc/ok)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str {:status "Success"})})
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status "Success"}})
     (catch com.mongodb.MongoWriteException mex
       (println (.getMessage mex))
       (if (= com.mongodb.ErrorCategory/DUPLICATE_KEY
@@ -198,54 +192,48 @@
                  mex))
            )
         {:status (stc/internal-server-error)
-         :headers {(eh/content-type) (mt/text-plain)}
-         :body (str
-                 {:status "Error"
-                  :message (.getMessage mex)
-                  :status-code 70
-                  :message-code 71})}
+         :headers {(eh/content-type) (mt/text-clojurescript)}
+         :body {:status "Error"
+                :message (.getMessage mex)
+                :status-code 70
+                :message-code 71}}
         {:status (stc/internal-server-error)
-         :headers {(eh/content-type) (mt/text-plain)}
-         :body (str
-                 {:status "Error"
-                  :status-code 70
-                  :message (.getMessage
-                             mex)})}
-       ))
+         :headers {(eh/content-type) (mt/text-clojurescript)}
+         :body {:status "Error"
+                :status-code 70
+                :message (.getMessage
+                           mex)}})
+     )
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str
-               {:status "Error"
-                :status-code 70
-                :message (.getMessage
-                           ex)})}
-     ))
- )
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status "Error"
+              :status-code 70
+              :message (.getMessage
+                         ex)}})
+   ))
 
 (defn delete-entity
   "Delete entity"
   [request]
   (try
-    (let [request-body (parse-body
+    (let [request-body (:body
                          request)]
       (mon/mongodb-delete-by-id
         (:entity-type request-body)
         (:_id (:entity-filter request-body))
        )
       {:status (stc/ok)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str {:status "success"})})
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status "success"}})
     (catch Exception ex
       (println (.getMessage ex))
       {:status (stc/internal-server-error)
-       :headers {(eh/content-type) (mt/text-plain)}
-       :body (str
-               {:status "Error"
-                :status-code 70
-                :message (.getMessage
-                           ex)})}
-     ))
- )
+       :headers {(eh/content-type) (mt/text-clojurescript)}
+       :body {:status "Error"
+              :status-code 70
+              :message (.getMessage
+                         ex)}})
+   ))
 
