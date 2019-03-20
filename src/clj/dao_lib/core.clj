@@ -99,33 +99,39 @@
 (defn get-entity
   "Prepare requested entity for response"
   [request]
-  (let [request-body (:body
-                       request)
-        {entity-type :entity-type
-         entity-filter :entity-filter
-         entity-projection :entity-projection
-         projection-include :projection-include} request-body
-        entity (mon/mongodb-find-by-id
-                 entity-type
-                 (:_id entity-filter)
-                 (build-projection
-                   entity-projection
-                   true))
-        entity  (assoc
-                  entity
-                  :_id
-                  (str
-                    (:_id entity))
-                 )]
-    (if entity
-      {:status (stc/ok)
+  (try
+    (let [request-body (:body
+                         request)
+          {entity-type :entity-type
+           entity-filter :entity-filter
+           entity-projection :entity-projection
+           projection-include :projection-include} request-body
+          entity (mon/mongodb-find-by-id
+                   entity-type
+                   (:_id entity-filter)
+                   (build-projection
+                     entity-projection
+                     true))
+          entity  (assoc
+                    entity
+                    :_id
+                    (str
+                      (:_id entity))
+                   )]
+      (if entity
+        {:status (stc/ok)
+         :headers {(eh/content-type) (mt/text-clojurescript)}
+         :body {:status  "success"
+                :data  entity}}
+        {:status (stc/not-found)
+         :headers {(eh/content-type) (mt/text-clojurescript)}
+         :body {:status  "error"
+                :error-message "There is no entity, for given criteria."}}))
+    (catch Exception e
+      (println (.getMessage e))
+      {:status (stc/internal-server-error)
        :headers {(eh/content-type) (mt/text-clojurescript)}
-       :body {:status  "success"
-              :data  entity}}
-      {:status (stc/not-found)
-       :headers {(eh/content-type) (mt/text-clojurescript)}
-       :body {:status  "error"
-              :error-message "There is no entity, for given criteria."}}))
+       :body {:status "Error"}}))
  )
 
 (defn update-entity
