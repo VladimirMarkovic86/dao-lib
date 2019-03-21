@@ -9,7 +9,10 @@
   "Build projection for db interaction"
   [vector-fields
    include]
-  (let [projection (atom {})]
+  (let [projection (atom {})
+        include (if include
+                  true
+                  false)]
     (doseq [field vector-fields]
       (swap!
         projection
@@ -121,11 +124,11 @@
       (if entity
         {:status (stc/ok)
          :headers {(eh/content-type) (mt/text-clojurescript)}
-         :body {:status  "success"
-                :data  entity}}
+         :body {:status "success"
+                :data entity}}
         {:status (stc/not-found)
          :headers {(eh/content-type) (mt/text-clojurescript)}
-         :body {:status  "error"
+         :body {:status "error"
                 :error-message "There is no entity, for given criteria."}}))
     (catch Exception e
       (println (.getMessage e))
