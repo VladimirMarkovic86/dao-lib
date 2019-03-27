@@ -1,4 +1,4 @@
-(defproject org.clojars.vladimirmarkovic86/dao-lib "0.3.11"
+(defproject org.clojars.vladimirmarkovic86/dao-lib "0.3.12"
   :description "Data access object library"
   :url "http://github.com/VladimirMarkovic86/dao-lib"
   :license {:name "Eclipse Public License"
@@ -7,7 +7,7 @@
                  [org.clojars.vladimirmarkovic86/ajax-lib "0.1.8"]
                  [org.clojars.vladimirmarkovic86/session-lib "0.2.14"]
                  [org.clojars.vladimirmarkovic86/mongo-lib "0.2.5"]
-                 [org.clojars.vladimirmarkovic86/utils-lib "0.4.6"]
+                 [org.clojars.vladimirmarkovic86/utils-lib "0.4.7"]
                  ]
 
   :min-lein-version "2.0.0"
