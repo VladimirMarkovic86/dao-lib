@@ -122,23 +122,24 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/ok))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "success")
        )
       
      )
@@ -180,15 +181,13 @@
       
      )
     
-    
-    
    )
   
  )
 
 (deftest test-get-entity
   
-  (testing
+  (testing "Test get entity"
     
     (let [request {}
           response (get-entity
@@ -196,9 +195,11 @@
       
       (is
         (= response
-           {:status (stc/internal-server-error)
+           {:status (stc/ok)
             :headers {(eh/content-type) (mt/text-clojurescript)}
-            :body {:status "Error"}})
+            :body {:status "success"
+                   :data {:_id ""}}
+            })
        )
       
      )
@@ -210,9 +211,11 @@
       
       (is
         (= response
-           {:status (stc/internal-server-error)
+           {:status (stc/ok)
             :headers {(eh/content-type) (mt/text-clojurescript)}
-            :body {:status "Error"}})
+            :body {:status "success"
+                   :data {:_id ""}}
+            })
        )
        
      )
@@ -233,39 +236,53 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/ok))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "success")
-             (= (get-in
-                  response
-                  [:body
-                   :data
-                   :username])
-                "test-username-1")
-             (= (get-in
-                  response
-                  [:body
-                   :data
-                   :email])
-                "test-email-1")
-             (= (get-in
-                  response
-                  [:body
-                   :data
-                   :password])
-                "test-password-1")
-             
-         )
+        (= (:status response)
+           (stc/ok))
        )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "success")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :data
+              :username])
+           "test-username-1")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :data
+              :email])
+           "test-email-1")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :data
+              :password])
+           "test-password-1")
+       )
+      
      )
     
    )
@@ -274,31 +291,33 @@
 
 (deftest test-update-entity
   
-  (testing
+  (testing "Test update entity"
     
     (let [request {}
           response (update-entity
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
-       ) 
+        (= (:status response)
+           (stc/ok))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "success")
+       )
+      
      )
     
     (let [request {:entity-type "user"
@@ -308,24 +327,26 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/ok))
        )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "success")
+       )
+      
      )
     
     (is
@@ -372,23 +393,32 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/internal-server-error))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "Error")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status-code])
+           70)
        )
       
      )
@@ -404,23 +434,32 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/internal-server-error))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "Error")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status-code])
+           70)
        )
       
      )
@@ -438,24 +477,26 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
-       ) 
+        (= (:status response)
+           (stc/ok))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "Success")
+       )
+      
      )
     
     (let [request {:entity-type "user"
@@ -464,24 +505,26 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/ok))
        )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "Success")
+       )
+      
      )
     
     (is
@@ -514,13 +557,11 @@
            :password "test-password-4"})
        )
       
-      (mon/mongodb-delete-by-filter
+      (mon/mongodb-delete-one
         "user"
         {:username "test-email-4"
          :email "test-email-4"
          :password "test-password-4"})
-      
-      
       
       (is
         (not
@@ -548,23 +589,32 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/internal-server-error))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "Error")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status-code])
+           70)
        )
       
      )
@@ -584,23 +634,32 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/internal-server-error))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "Error")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status-code])
+           70)
        )
       
      )
@@ -611,30 +670,31 @@
 
 (deftest test-delete-entity
   
-  (testing
+  (testing "Test delete entity"
     
     (let [request {}
           response (delete-entity
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/ok))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "success")
        )
       
      )
@@ -647,23 +707,32 @@
                      request)]
       
       (is
-        (and (= (:status response)
-                (stc/internal-server-error))
-             (= (get-in
-                  response
-                  [:headers
-                   (eh/content-type)])
-                (mt/text-clojurescript))
-             (= (get-in
-                  response
-                  [:body
-                   :status])
-                "Error")
-             (= (get-in
-                  response
-                  [:body
-                   :status-code])
-                70))
+        (= (:status response)
+           (stc/internal-server-error))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:headers
+              (eh/content-type)])
+           (mt/text-clojurescript))
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status])
+           "Error")
+       )
+      
+      (is
+        (= (get-in
+             response
+             [:body
+              :status-code])
+           70)
        )
       
      )
